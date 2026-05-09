@@ -138,7 +138,7 @@ python scripts/generate_figures.py              # Paper figures
 @inproceedings{imstmamba2026,
   title     = {IMST-Mamba: Informative Missingness State-Space Model
                for Early Sepsis Prediction in ICU Patients},
-  author    = {Anonymous},
+  author    = {Park, Yunhu},
   booktitle = {Machine Learning for Healthcare Conference (MLHC)},
   year      = {2026}
 }
