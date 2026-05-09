@@ -1,0 +1,19 @@
+model:
+  name: imst_mamba
+  n_features: 34
+  d_model: 256
+  d_state: 32           # SSM state dimension
+  n_layers: 3           # number of IMST-Mamba blocks
+  d_miss: 16            # missingness embedding dimension per feature
+  d_time: 64            # time embedding dimension
+  n_miss_states: 3      # 0=never, 1=recent, 2=stale
+  dropout: 0.1
+  # Recency thresholds (seconds) — initial values, learned during training
+  # vitals: 2h, labs: 12h
+  tau_init_vitals: 7200.0
+  tau_init_labs: 43200.0
+  use_auxiliary_tasks: true
+  time_conditioning: true
+  per_feature_decay: true
+  # Aggregation after SSM
+  aggregator: attention_pooling   # attention_pooling | mean | last

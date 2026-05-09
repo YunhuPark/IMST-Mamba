@@ -1,0 +1,81 @@
+# PhysioNet/CinC Challenge 2019 — feature configuration
+# Source: physionet.org/content/challenge-2019/1.0.0/
+# 34 clinical time-series features (8 vitals + 26 labs)
+# Demographics (Age, Gender, Unit1, Unit2, HospAdmTime, ICULOS) used for splits only
+
+dataset: challenge2019
+
+vital_features:
+  - HR            # Heart Rate (bpm)
+  - O2Sat         # Pulse oximetry (%)
+  - Temp          # Temperature (°C)
+  - SBP           # Systolic blood pressure (mmHg)
+  - MAP           # Mean arterial pressure (mmHg)
+  - DBP           # Diastolic blood pressure (mmHg)
+  - Resp          # Respiration rate (breaths/min)
+  - EtCO2         # End-tidal CO2 (mmHg)
+
+lab_features:
+  - BaseExcess    # Base excess (mmol/L)
+  - HCO3          # Bicarbonate (mmol/L)
+  - FiO2          # Fraction of inspired O2
+  - pH            # Arterial pH
+  - PaCO2         # Partial pressure of CO2 (mmHg)
+  - SaO2          # O2 saturation (%)
+  - AST           # Aspartate aminotransferase (IU/L)
+  - BUN           # Blood urea nitrogen (mg/dL)
+  - Alkalinephos  # Alkaline phosphatase (IU/L)
+  - Calcium       # Serum calcium (mg/dL)
+  - Chloride      # Serum chloride (mmol/L)
+  - Creatinine    # Creatinine (mg/dL)
+  - Bilirubin_direct  # Direct bilirubin (mg/dL)
+  - Glucose       # Serum glucose (mg/dL)
+  - Lactate       # Lactate (mmol/L)
+  - Magnesium     # Magnesium (mmol/L)
+  - Phosphate     # Phosphate (mg/dL)
+  - Potassium     # Potassium (mmol/L)
+  - Bilirubin_total   # Total bilirubin (mg/dL)
+  - TroponinI     # Troponin I (ng/mL)
+  - Hct           # Hematocrit (%)
+  - Hgb           # Hemoglobin (g/dL)
+  - PTT           # Partial thromboplastin time (seconds)
+  - WBC           # White blood cell count (10^3/µL)
+  - Fibrinogen    # Fibrinogen (mg/dL)
+  - Platelets     # Platelet count (10^3/µL)
+
+# Physiologically valid ranges for outlier clipping
+outlier_ranges:
+  HR:              [0,    350]
+  O2Sat:           [0,    100]
+  Temp:            [25.0, 45.0]
+  SBP:             [0,    300]
+  MAP:             [0,    200]
+  DBP:             [0,    200]
+  Resp:            [0,    100]
+  EtCO2:           [0,    100]
+  BaseExcess:      [-30,  30]
+  HCO3:            [5,    60]
+  FiO2:            [0.21, 1.0]
+  pH:              [6.5,  8.0]
+  PaCO2:           [10,   150]
+  SaO2:            [0,    100]
+  AST:             [1,    5000]
+  BUN:             [1,    300]
+  Alkalinephos:    [1,    5000]
+  Calcium:         [0.5,  20]
+  Chloride:        [70,   150]
+  Creatinine:      [0.1,  30]
+  Bilirubin_direct:[0.1,  100]
+  Glucose:         [10,   2000]
+  Lactate:         [0.1,  30]
+  Magnesium:       [0.1,  10]
+  Phosphate:       [0.1,  20]
+  Potassium:       [1,    10]
+  Bilirubin_total: [0.1,  100]
+  TroponinI:       [0,    500]
+  Hct:             [5,    75]
+  Hgb:             [1,    25]
+  PTT:             [10,   200]
+  WBC:             [0.1,  500]
+  Fibrinogen:      [50,   2000]
+  Platelets:       [1,    2000]

@@ -1,0 +1,8 @@
+model:
+  name: lstm
+  n_features: 34
+  hidden_size: 256
+  n_layers: 2
+  dropout: 0.1
+  use_mask: true        # append binary missingness mask to input
+  bin_size_hours: 1     # hourly binning for irregular → regular

@@ -1,0 +1,43 @@
+# ── Core ML ──────────────────────────────────────────────────────────────────
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24.0
+scipy>=1.10.0
+scikit-learn>=1.3.0
+pandas>=2.0.0
+pyarrow>=12.0.0
+
+# ── State Space Models (optional CUDA extension) ──────────────────────────────
+# mamba-ssm>=1.2.0          # requires CUDA — install separately if available
+# causal-conv1d>=1.1.0      # required by mamba-ssm
+
+# ── Survival Analysis ─────────────────────────────────────────────────────────
+lifelines>=0.27.0
+
+# ── Hyperparameter Tuning ─────────────────────────────────────────────────────
+optuna>=3.3.0
+
+# ── Config Management ─────────────────────────────────────────────────────────
+omegaconf>=2.3.0
+hydra-core>=1.3.0
+
+# ── Experiment Tracking ───────────────────────────────────────────────────────
+wandb>=0.15.0
+
+# ── Statistics ────────────────────────────────────────────────────────────────
+statsmodels>=0.14.0
+pingouin>=0.5.3
+
+# ── Visualization ─────────────────────────────────────────────────────────────
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.15.0
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+tqdm>=4.65.0
+joblib>=1.3.0
+python-dotenv>=1.0.0
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+pytest>=7.4.0
+pytest-cov>=4.1.0

@@ -1,0 +1,90 @@
+seed: 42
+device: cuda          # cuda | cpu
+precision: float32    # float32 | float16 (AMP)
+
+data:
+  raw_dir: data/raw
+  interim_dir: data/interim
+  processed_dir: data/processed
+  prediction_horizon: 6       # hours ahead to predict sepsis
+  observation_window: 48      # max hours of ICU data to use per patient
+  min_stay_hours: 4           # exclude stays shorter than this
+  train_frac: 0.70
+  val_frac: 0.10
+  test_frac: 0.20
+  # Feature groups
+  # Challenge 2019: 8 vitals + 26 labs = 34 features
+  vital_features:
+    - HR       # Heart Rate
+    - O2Sat    # SpO2
+    - Temp     # Temperature
+    - SBP      # Systolic BP
+    - MAP      # Mean Arterial Pressure
+    - DBP      # Diastolic BP
+    - Resp     # Respiratory Rate
+    - EtCO2    # End-tidal CO2
+  lab_features:
+    - BaseExcess
+    - HCO3
+    - FiO2
+    - pH
+    - PaCO2
+    - SaO2
+    - AST
+    - BUN
+    - Alkalinephos
+    - Calcium
+    - Chloride
+    - Creatinine
+    - Bilirubin_direct
+    - Glucose
+    - Lactate
+    - Magnesium
+    - Phosphate
+    - Potassium
+    - Bilirubin_total
+    - TroponinI
+    - Hct
+    - Hgb
+    - PTT
+    - WBC
+    - Fibrinogen
+    - Platelets
+  # Total: 8 vitals + 26 labs = 34 features
+
+training:
+  batch_size: 16
+  max_epochs: 100
+  early_stopping_patience: 20
+  early_stopping_metric: auprc   # monitor validation AUPRC
+  grad_clip_norm: 1.0
+  warmup_steps: 2000
+  optimizer:
+    name: adamw
+    lr: 1.0e-4
+    weight_decay: 1.0e-4
+    betas: [0.9, 0.999]
+  scheduler:
+    name: cosine_annealing
+    T_max: 100
+    eta_min: 1.0e-6
+  loss:
+    name: focal
+    gamma: 2.0
+    alpha: 0.90           # weight for positive class (강화: 0.92% 양성 비율)
+    lambda_mortality: 0.0
+    lambda_sofa: 0.0
+
+evaluation:
+  bootstrap_n: 1000
+  bootstrap_seed: 42
+  significance_alpha: 0.05
+  bonferroni_n_comparisons: 8
+  specificity_targets: [0.90, 0.95]
+  ewt_threshold_specificity: 0.90  # threshold for EWT computation
+
+logging:
+  use_wandb: false      # set true when wandb is configured
+  project_name: sepsis-imst-mamba
+  log_every_n_steps: 50
+  save_dir: results

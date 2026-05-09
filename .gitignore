@@ -1,0 +1,59 @@
+# Patient data — NEVER commit (PhysioNet 2019, download separately)
+data/raw/
+data/interim/
+data/processed/
+
+# Model checkpoints and large result files
+results/*/checkpoints/
+results/checkpoints/
+*.pt
+*.pth
+*.pkl
+*.npy
+triage_code.zip
+*.zip
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Environments
+.env
+.venv/
+venv/
+env/
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Wandb
+wandb/
+
+# Optuna
+optuna.db

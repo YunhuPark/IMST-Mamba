@@ -1,0 +1,9 @@
+model:
+  name: transformer
+  n_features: 34
+  d_model: 256
+  nhead: 8
+  num_encoder_layers: 4
+  dim_feedforward: 512
+  dropout: 0.1
+  time_embedding: time2vec   # time2vec | sinusoidal
