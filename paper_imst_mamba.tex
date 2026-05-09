@@ -403,11 +403,13 @@ qSOFA $\geq 1$ & 0.5730 & 0.0114 & 0.487 & 0.652 & 0.013 \\
 qSOFA $\geq 2$ & 0.5730 & 0.0114 & 0.072 & 0.964 & 0.018 \\
 modSOFA $\geq 2$ & 0.5801 & 0.0133 & 0.553 & 0.573 & 0.012 \\
 modSOFA $\geq 4$ & 0.5801 & 0.0133 & 0.275 & 0.806 & 0.013 \\
+modSOFA $\geq 6$ & 0.5801 & 0.0133 & 0.128 & 0.947 & 0.022 \\
 \midrule
-\textbf{IMST-Mamba} & \textbf{0.7791} & \textbf{0.0514}
+\textbf{IMST-Mamba}$^\dagger$ & \textbf{0.7791} & \textbf{0.0514}
                     & \textbf{0.484} & \textbf{0.900} & \textbf{0.043} \\
 \bottomrule
 \end{tabular}
+{\small $^\dagger$ Sensitivity/Specificity/PPV at Se@Sp90 operating point.}
 \end{table}
 
 IMST-Mamba achieves AUROC 24.9 points above qSOFA (Table~\ref{tab:clinical}).
@@ -428,24 +430,27 @@ EWT $>0$ indicates alarm before sepsis onset.}
 \toprule
 Method & Threshold & Mean EWT & Median EWT & \% Early & Detection Rate \\
 \midrule
-qSOFA $\geq 2$   & 2     & 37.2h & 17.0h & 75.3\% & 49.0\% \\
-modSOFA $\geq 2$ & 2     & 42.2h & 20.5h & 69.5\% & —      \\
-GRU-D            & 0.377 & 46.1h & 28.0h & 78.6\% & 70.6\% \\
-LSTM             & 0.340 & 48.0h & 28.0h & 77.8\% & 66.3\% \\
-Transformer      & 0.378 & 56.7h & 22.0h & 80.1\% & 69.0\% \\
+qSOFA $\geq 2$   & 2        & 37.2h & 17.0h & 75.3\% & 49.0\% \\
+modSOFA $\geq 2$ & 2        & 42.2h & 20.5h & 69.5\% & —      \\
+RETAIN           & Se@Sp90  & 54.3h & 31.0h & 86.2\% & 86.1\% \\
+GRU-D            & Se@Sp90  & 46.1h & 28.0h & 78.6\% & 70.6\% \\
+LSTM             & Se@Sp90  & 48.0h & 28.0h & 77.8\% & 66.3\% \\
+Transformer      & Se@Sp90  & 56.7h & 22.0h & 80.1\% & 69.0\% \\
 \midrule
-\textbf{IMST-Mamba} & \textbf{0.332} & \textbf{44.7h}
+\textbf{IMST-Mamba} & Se@Sp90 & \textbf{44.7h}
                     & \textbf{27.0h} & \textbf{73.2\%} & \textbf{68.5\%} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-All ML models detect substantially more sepsis patients than qSOFA (66--86\%
-vs.\ 49\%) at the same 90\% specificity (Table~\ref{tab:ewt}).  IMST-Mamba's
-mean EWT of 44.7 hours provides clinically actionable lead time.  Wilcoxon
-signed-rank test versus qSOFA$\geq$2 yielded $p=0.248$, reflecting wide
-inter-patient variation in ICU time series; the practical gain is captured by
-the 19.5-point improvement in detection rate.
+All ML models detect substantially more sepsis patients than qSOFA (49\%) at the
+same 90\% specificity, with per-patient detection rates of 66--86\%
+(Table~\ref{tab:ewt}).  RETAIN achieves the highest per-patient detection rate
+(86.1\%) despite its lower overall AUROC (0.6795), illustrating the distinction
+between timestep-level sensitivity and patient-level detection over long stays.
+IMST-Mamba's mean EWT of 44.7 hours provides clinically actionable lead time, a
+19.5-point improvement in detection rate over qSOFA.  Wilcoxon signed-rank test
+versus qSOFA$\geq$2 yielded $p=0.248$, reflecting wide inter-patient variation.
 
 \subsection{Uncertainty Quantification}
 
