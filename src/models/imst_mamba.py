@@ -98,20 +98,18 @@ class IMSTMamba(nn.Module):
             raise ValueError(f"unknown feature names: {unknown}")
         self.feature_names = list(feature_names)
 
-        # Per-feature decay initialization must follow the exact feature order.
         tau_init_hours = [RECENCY_THRESHOLD_INIT[name] / 3600.0 for name in self.feature_names]
         self.temporal_decay = TemporalDecayLayer(
             n_features=n_features,
             init_decay_hours=tau_init_hours,
         )
 
-        # Inputs used by the official benchmark are standardized in model space,
-        # so the population mean is zero unless a compatible stats file is loaded.
         self.register_buffer("x_mean", torch.zeros(n_features))
 
         self.miss_encoder = MissingnessEncoder(
             n_features=n_features,
             d_miss=d_miss,
+            feature_names=self.feature_names,
         )
         self.time_emb = TimeEmbedding(d_out=d_time)
 
@@ -128,9 +126,6 @@ class IMSTMamba(nn.Module):
             for _ in range(n_layers)
         ])
 
-        # The benchmark disables auxiliary heads, but keep them available for the
-        # original research pipeline. n_heads is bounded so small benchmark models
-        # remain valid while the default d_model=256 still uses 8 heads.
         n_heads = 8 if d_model % 8 == 0 else 4 if d_model % 4 == 0 else 1
         self.aggregator = AttentionPooling(d_model=d_model, n_heads=n_heads)
 
@@ -183,13 +178,7 @@ class IMSTMamba(nn.Module):
                 f"expected {self.n_features} features, received {x.shape[-1]}"
             )
 
-        # s is log1p(hours since last observation). Convert it back to hours.
         s_hours = torch.expm1(s.clamp(max=10.0))
-
-        # The previous implementation shifted x by one row. That made a current
-        # observation use the previous row and made t=0 observations become zero.
-        # This running state uses the current observation when present and only
-        # past observations when the current value is missing.
         x_last = running_last_observed(x, m)
         x_mean = self.x_mean.to(x.device)
         x_imputed, _ = self.temporal_decay(
