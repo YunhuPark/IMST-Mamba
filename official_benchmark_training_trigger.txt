@@ -1,0 +1,6 @@
+launch=2026-09-04
+basis=Official Challenge Benchmark CI run 33851128670 passed
+comparison=same six vitals, official SepsisLabel, patient-level 70/15/15, validation utility threshold
+reference_gru_utility=0.34512958980235814
+reference_gru_auroc=0.7946005008323214
+reference_gru_auprc=0.09500058131187976
