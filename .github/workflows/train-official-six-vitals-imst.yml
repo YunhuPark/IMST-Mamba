@@ -2,11 +2,6 @@ name: Train Official Six-Vitals IMST-Mamba
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - fix/official-challenge-benchmark
-    paths:
-      - 'official_benchmark_training_trigger.txt'
 
 permissions:
   contents: read
