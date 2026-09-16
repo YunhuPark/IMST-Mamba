@@ -14,7 +14,7 @@ IMST-Mamba encodes a three-state missingness taxonomy (*never observed*, *recent
 | **IMST-Mamba** | 0.7791 | **0.8514** | 0.484 | 44.7h |
 
 Long stays are the only subgroup IMST-Mamba wins. Transformer is ahead
-everywhere else, by a wide margin on short stays (Table 2 in
+in every other stratum reported below (Table 2 in
 [`paper_draft.md`](paper_draft.md), §5.2):
 
 | Subgroup | IMST-Mamba | Transformer | GRU-D | LSTM |
@@ -23,14 +23,25 @@ everywhere else, by a wide margin on short stays (Table 2 in
 | Low missingness | 0.7738 | **0.8253** | 0.7789 | 0.7645 |
 | High missingness | 0.7772 | **0.8427** | 0.7710 | 0.7846 |
 | High lab-missingness | 0.7459 | **0.8147** | 0.7714 | 0.7769 |
-| Short stays | 0.6474 | **0.9392** | 0.6306 | 0.7093 |
+| Short stays | _under verification_ | _under verification_ | _under verification_ | _under verification_ |
 | Long stays | **0.8514** | 0.8122 | 0.8468 | 0.8419 |
 
-The short-stay gap (0.6474 vs 0.9392) is the honest counterpart to the
-long-stay result: a short ICU stay has a brief, recent observation
-history, so there is little staleness for this design to read, and
-conditioning on it costs accuracy. The claim here is a subgroup where
-missingness structure carries signal — not a better model overall.
+So the claim is a subgroup where missingness structure carries signal,
+not a better model overall.
+
+> **Short stays is withheld pending re-run.** Table 2 of the draft lists
+> identical values for `Short stays` and `First 6h` — 0.6474 / 0.9392 /
+> 0.6306 / 0.7093 across all four models. The two are computed over
+> different patient sets in
+> [`scripts/analyze_subgroups.py`](scripts/analyze_subgroups.py)
+> (`seq_len <= 33rd percentile` vs the first K hours of every patient),
+> so matching to four decimals is not plausible. `_print_summary_table`
+> also omits `short_stay` from the subgroups it prints, and
+> `generate_figures_final.py` hard-codes its bars instead of reading
+> `subgroup_analysis.json`, so the figure inherits whatever was
+> transcribed. The real short-stay number will be filled in once
+> `analyze_subgroups.py` is re-run and `subgroup_analysis.json` is
+> committed.
 
 **Ablation** — removing the staleness signal ($s=0$) drops AUROC by **−0.121** (vs −0.039 for the binary mask), confirming that time-since-last-observation is the single most predictive component.
 
