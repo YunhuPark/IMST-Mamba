@@ -192,7 +192,31 @@ All ML models detect substantially more sepsis patients than qSOFA (66–86% vs 
 
 ### 5.6 Uncertainty Quantification
 
-We apply MC Dropout (K=30 stochastic forward passes) to quantify epistemic uncertainty. The MC mean predictions maintain AUROC 0.7789 with ECE 0.239, indicating room for calibration improvement. Uncertainty (prediction std) correlates with missingness rate (r=−0.107), suggesting the model appropriately increases confidence when more data is available.
+We apply MC Dropout (K=30 stochastic forward passes) to quantify epistemic uncertainty. The MC mean predictions maintain AUROC 0.7789 with ECE 0.239, indicating room for calibration improvement. Uncertainty (prediction std) correlates with missingness rate (r=−0.107).
+
+> **⚠ Do not submit this section as written — two items are unresolved.**
+>
+> **1. Figures 3 and 4 are not measurements.** Until commit `3245f71`,
+> `scripts/generate_figures_final.py` did not read any results file for these
+> two panels. The reliability bins, their per-bin counts, and the uncertainty
+> deciles were written by hand to look consistent with ECE=0.2391 and
+> r=−0.1075; the source comments said as much ("approximate reliability bins
+> derived from ECE", "approximate decile curve"). The PDFs currently under
+> `results/figures/` were produced that way and are still what the manuscripts
+> include. The scripts now read `mc_dropout_results.json` and refuse to run
+> without it, so re-run `scripts/analyze_mc_dropout.py` and regenerate both
+> figures before this goes anywhere.
+>
+> **2. The sign of r is read backwards here.** The correlation is between
+> missingness rate and uncertainty, so r=−0.107 means uncertainty *falls* as
+> observations get *less* complete — the model is more confident where it has
+> seen less. The earlier wording ("appropriately increases confidence when more
+> data is available") describes r>0 and has been removed rather than reversed,
+> because the observed direction is the less comfortable one and deserves a
+> deliberate interpretation. Note also that the hand-drawn Figure 4 rises with
+> missingness, i.e. it was drawn to match that wording rather than the measured
+> sign. At |r|=0.107 the honest reading may simply be that the relationship is
+> negligible.
 
 ### 5.7 Missingness-Aware Imputation Comparison
 

@@ -394,6 +394,21 @@ indicating room for calibration improvement.  Epistemic uncertainty correlates
 with missingness rate ($r=-0.107$), demonstrating that the model appropriately
 increases confidence when observations are more complete.
 
+% ==========================================================================
+% UNRESOLVED -- do not compile for submission as-is.
+%
+% (1) fig3_reliability and fig4_uncertainty_miss below were NOT generated from
+%     analysis output. Their bins, counts and decile values were written by
+%     hand to look consistent with ECE=0.2391 and r=-0.1075. The generator has
+%     been fixed (commit 3245f71) to read results/mc_dropout_results.json and
+%     to fail if it is absent, but the committed PDFs still predate that.
+%     Re-run scripts/analyze_mc_dropout.py, regenerate, then remove this note.
+%
+% (2) The sentence above reads r=-0.107 as the model being more confident when
+%     observations are MORE complete. r is corr(missingness, uncertainty), so a
+%     negative value means the opposite: uncertainty falls as data gets sparser.
+%     Resolve the interpretation before submitting.
+% ==========================================================================
 \begin{figure}[t]
 \centering
 \begin{minipage}{0.45\linewidth}
