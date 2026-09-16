@@ -232,6 +232,10 @@ def main():
     }
 
     # ── Save ──────────────────────────────────────────────────────────────
+    # Persist the correlation too: fig4 annotates the plot with it, and a figure
+    # should never have to re-derive or hard-code a number the analysis knows.
+    corr_miss_unc = float(np.corrcoef(miss_rate_ref, std_probs)[0, 1])
+
     results = {
         "mc_passes":         MC_PASSES,
         "mc_metrics":        r_mc,
@@ -239,6 +243,7 @@ def main():
         "reliability_diagram": rel_diag,
         "uncertainty_vs_accuracy":   uncertainty_vs_acc,
         "uncertainty_vs_missingness": uncertainty_vs_miss,
+        "corr_miss_uncertainty":     corr_miss_unc,
         "high_uncertainty_analysis": high_unc_stats,
     }
 
@@ -252,8 +257,7 @@ def main():
     print(f"  AUROC = {r_mc['auroc']:.4f}  AUPRC = {r_mc['auprc']:.4f}")
     print(f"  ECE   = {ece:.4f}")
     print(f"  Mean uncertainty (std) = {std_probs.mean():.4f}")
-    print(f"  Uncertainty corr w/ miss rate: "
-          f"{float(np.corrcoef(miss_rate_ref, std_probs)[0,1]):.4f}")
+    print(f"  Uncertainty corr w/ miss rate: {corr_miss_unc:.4f}")
 
 
 if __name__ == "__main__":

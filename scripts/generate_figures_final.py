@@ -159,16 +159,21 @@ def fig2_ablation():
     print("✓ fig2_ablation")
 
 
-# ── Figure 3: Reliability diagram (from ECE=0.2391, MC Dropout) ───────────
+# ── Figure 3: Reliability diagram (MC Dropout) ────────────────────────────
 
 def fig3_reliability():
-    # Approximate reliability bins derived from ECE=0.2391 and known calibration
-    # pattern: model under-predicts (outputs low probs due to focal loss training)
-    conf_bins = [0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95]
-    # Actual fraction of positives (well-calibrated would equal conf)
-    # Model has ECE=0.239, mostly in low-confidence bins (very few high-prob predictions)
-    acc_bins  = [0.012, 0.028, 0.055, 0.095, 0.140, 0.210, 0.310, 0.450, 0.620, 0.780]
-    n_bins    = [180000, 65000, 30000, 15000, 5000, 2000, 900, 400, 200, 100]
+    mc = load_results("mc_dropout_results.json")
+
+    bins = [b for b in mc["reliability_diagram"] if b.get("acc") is not None]
+    if not bins:
+        raise ValueError(
+            "reliability_diagram has no populated bins; re-run "
+            "scripts/analyze_mc_dropout.py"
+        )
+    conf_bins = [b["conf"] for b in bins]
+    acc_bins  = [b["acc"]  for b in bins]
+    n_bins    = [b["n"]    for b in bins]
+    ece       = float(mc["ece"])
 
     fig, ax = plt.subplots(figsize=(4.2, 4.2))
     ax.plot([0, 1], [0, 1], "k--", linewidth=1, label="Perfect calibration", zorder=1)
@@ -177,7 +182,7 @@ def fig3_reliability():
     sc = ax.scatter(conf_bins, acc_bins, s=sizes, c=n_bins,
                     cmap="Blues", edgecolors=BLUE, linewidths=0.8, zorder=3)
     ax.plot(conf_bins, acc_bins, color=BLUE, linewidth=1.5,
-            label="IMST-Mamba (ECE=0.239)", zorder=2)
+            label=f"IMST-Mamba (ECE={ece:.3f})", zorder=2)
 
     plt.colorbar(sc, ax=ax, label="# timesteps", shrink=0.85)
     ax.fill_between(conf_bins, conf_bins, acc_bins, alpha=0.08, color=RED)
@@ -198,13 +203,23 @@ def fig3_reliability():
 # ── Figure 4: Uncertainty vs Missingness ──────────────────────────────────
 
 def fig4_uncertainty_miss():
-    # From MC Dropout: corr(miss_rate, uncertainty) = -0.1075
-    # mean_unc = 0.0255; approximate decile curve
-    miss_vals = [0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95]
-    # Uncertainty decreases as missingness decreases (more data → more confident)
-    # Correlation = -0.1075 (weak negative)
-    unc_vals  = [0.0240, 0.0245, 0.0248, 0.0252, 0.0255,
-                 0.0258, 0.0261, 0.0265, 0.0268, 0.0272]
+    mc = load_results("mc_dropout_results.json")
+
+    deciles = mc["uncertainty_vs_missingness"]
+    if not deciles:
+        raise ValueError(
+            "uncertainty_vs_missingness is empty; re-run "
+            "scripts/analyze_mc_dropout.py"
+        )
+    miss_vals = [d["mean_miss"] for d in deciles]
+    unc_vals  = [d["mean_unc"]  for d in deciles]
+
+    corr = mc.get("corr_miss_uncertainty")
+    if corr is None:
+        raise KeyError(
+            "corr_miss_uncertainty missing from mc_dropout_results.json; "
+            "re-run scripts/analyze_mc_dropout.py (it now persists this value)"
+        )
 
     fig, ax = plt.subplots(figsize=(5, 3.6))
     ax.plot(miss_vals, unc_vals, "o-", color=BLUE, linewidth=2, markersize=6)
@@ -212,7 +227,8 @@ def fig4_uncertainty_miss():
     ax.set_xlabel("Mean missingness rate (per patient)")
     ax.set_ylabel("Epistemic uncertainty (std dev)")
     ax.set_title("Uncertainty vs. Missingness Rate")
-    ax.text(0.05, 0.88, f"r = −0.107", transform=ax.transAxes,
+    ax.text(0.05, 0.88, f"r = {MINUS if corr < 0 else chr(43)}{abs(corr):.3f}",
+            transform=ax.transAxes,
             fontsize=9, color=BLUE,
             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor=BLUE, alpha=0.8))
     ax.spines["top"].set_visible(False)
