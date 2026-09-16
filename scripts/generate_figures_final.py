@@ -8,6 +8,7 @@ Output: results/figures/  (PDF + PNG)
 """
 from __future__ import annotations
 from pathlib import Path
+import json
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -28,8 +29,42 @@ PURPLE = "#7b3294"
 ORANGE = "#b35806"
 GRAY   = "#969696"
 
+MINUS  = "−"   # typographic minus used in figure labels
+
 FIG_DIR = Path("results/figures")
 FIG_DIR.mkdir(parents=True, exist_ok=True)
+
+RESULTS_DIR = Path("results")
+
+
+def load_results(name: str) -> dict:
+    """Read an analysis artifact.
+
+    Figures must not carry their own numbers. A hard-coded value cannot
+    disagree with the analysis loudly -- it just quietly becomes the number
+    that gets published.
+    """
+    path = RESULTS_DIR / name
+    if not path.exists():
+        raise FileNotFoundError(
+            f"{path} not found. Run the matching scripts/analyze_*.py first; "
+            f"figures are rendered from analysis output, not from literals."
+        )
+    with open(path) as f:
+        return json.load(f)
+
+
+def pick(data: dict, model: str, key: str, field: str = "auroc") -> float:
+    """Fetch one metric, failing loudly rather than substituting a placeholder."""
+    try:
+        v = data[model][key][field]
+    except (KeyError, TypeError):
+        raise KeyError(
+            f"{field} missing for model={model!r} key={key!r}; re-run the analysis"
+        ) from None
+    if v is None:
+        raise KeyError(f"{field} is null for model={model!r} key={key!r}")
+    return float(v)
 
 
 # ── Figure 1: Subgroup AUROC ───────────────────────────────────────────────
@@ -37,11 +72,12 @@ FIG_DIR.mkdir(parents=True, exist_ok=True)
 def fig1_subgroup():
     subgroups = ["Overall", "Low\nmissingness", "High\nmissingness",
                  "Short\nstays", "Long\nstays"]
+    keys = ["overall", "miss_low", "miss_high", "short_stay", "long_stay"]
+
+    raw = load_results("subgroup_analysis.json")
     data = {
-        "IMST-Mamba":  [0.7791, 0.7738, 0.7772, 0.6474, 0.8514],
-        "Transformer": [0.8517, 0.8253, 0.8427, 0.9392, 0.8122],
-        "GRU-D":       [0.7770, 0.7789, 0.7710, 0.6306, 0.8468],
-        "LSTM":        [0.7800, 0.7645, 0.7846, 0.7093, 0.8419],
+        model: [pick(raw, model, k) for k in keys]
+        for model in ["IMST-Mamba", "Transformer", "GRU-D", "LSTM"]
     }
     colors = [BLUE, RED, GREEN, PURPLE]
     x = np.arange(len(subgroups))
@@ -86,15 +122,20 @@ def fig2_ablation():
         "− staleness  ($s$=0)",
         "− inter-event  ($\\delta t$=1)",
     ]
-    aurocs = [0.7791, 0.7406, 0.6578, 0.7798]
+    abl = load_results("ablation_results.json")
+    aurocs = [pick({"m": abl}, "m", k)
+              for k in ["full", "no_mask", "no_s", "no_delta_t"]]
     colors = [BLUE, "#f4a582", RED, "#d1e5f0"]
 
     fig, ax = plt.subplots(figsize=(6.5, 3.2))
     y = np.arange(len(labels))
     bars = ax.barh(y, aurocs, color=colors, edgecolor="white", linewidth=0.5)
 
-    deltas = [a - 0.7791 for a in aurocs]
-    tags = ["baseline", f"−0.039", f"−0.121", "+0.001"]
+    base = aurocs[0]
+    deltas = [a - base for a in aurocs]
+    tags = ["baseline"] + [
+        f"{MINUS if d < 0 else chr(43)}{abs(d):.3f}" for d in deltas[1:]
+    ]
     for bar, tag, d in zip(bars, tags, deltas):
         col = "white" if abs(d) > 0.01 or tag == "baseline" else "#333"
         ax.text(bar.get_width() - 0.002, bar.get_y() + bar.get_height()/2,
@@ -104,8 +145,8 @@ def fig2_ablation():
     ax.set_yticklabels(labels)
     ax.set_xlabel("AUROC")
     ax.set_xlim(0.61, 0.81)
-    ax.axvline(0.7791, color=BLUE, linewidth=1.2, linestyle="--",
-               label="Full model (0.7791)", alpha=0.8)
+    ax.axvline(base, color=BLUE, linewidth=1.2, linestyle="--",
+               label=f"Full model ({base:.4f})", alpha=0.8)
     ax.legend(fontsize=8, loc="lower right")
     ax.set_title("Ablation Study — IMST-Mamba")
     ax.invert_yaxis()

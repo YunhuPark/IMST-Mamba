@@ -72,7 +72,7 @@ def fig_subgroup_auroc():
 
     subgroups = ["Overall", "Short stays", "Long stays",
                  "Low miss.", "High miss."]
-    keys      = ["overall", "short_stays", "long_stays",
+    keys      = ["overall", "short_stay", "long_stay",
                  "miss_low", "miss_high"]
 
     models = ["IMST-Mamba", "Transformer", "GRU-D", "LSTM"]
@@ -85,7 +85,13 @@ def fig_subgroup_auroc():
         vals = []
         for k in keys:
             v = data.get(model, {}).get(k, {}).get("auroc", None)
-            vals.append(v if v is not None else 0.0)
+            if v is None:
+                raise KeyError(
+                    f"subgroup_analysis.json has no auroc for model={model!r} "
+                    f"subgroup={k!r}. Re-run scripts/analyze_subgroups.py; do not "
+                    f"plot a placeholder, it silently becomes a reported number."
+                )
+            vals.append(v)
         bars = ax.bar(x + i * width - 1.5 * width, vals,
                       width, label=model,
                       color=COLORS.get(model, "#888"),
