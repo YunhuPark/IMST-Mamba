@@ -1,0 +1,118 @@
+name: Train Official Six-Vitals IMST-Mamba
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  train-official-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install benchmark dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch || python -m pip install torch
+          python -m pip install 'numpy>=1.26' 'pandas>=2.2' 'scikit-learn>=1.5' awscli
+          python -m pip check
+
+      - name: Download official PhysioNet 2019 training sets
+        shell: bash
+        run: |
+          set -euo pipefail
+          RAW_DIR="$RUNNER_TEMP/physionet2019-training"
+          mkdir -p "$RAW_DIR"
+          aws s3 sync \
+            --no-sign-request \
+            --only-show-errors \
+            --exclude "*" \
+            --include "*.psv" \
+            s3://physionet-open/challenge-2019/1.0.0/training/ \
+            "$RAW_DIR/"
+          PATIENT_COUNT=$(find "$RAW_DIR" -type f -name '*.psv' | wc -l | tr -d ' ')
+          echo "patient_files=$PATIENT_COUNT"
+          test "$PATIENT_COUNT" -eq 40336
+          SOURCE_SHA=$(cd "$RAW_DIR" && find . -type f -name '*.psv' -print0 | sort -z | xargs -0 sha256sum | sha256sum | awk '{print $1}')
+          echo "RAW_DIR=$RAW_DIR" >> "$GITHUB_ENV"
+          echo "PATIENT_COUNT=$PATIENT_COUNT" >> "$GITHUB_ENV"
+          echo "SOURCE_SHA=$SOURCE_SHA" >> "$GITHUB_ENV"
+
+      - name: Train compact official-label six-Vitals IMST-Mamba
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARTIFACT_DIR="$RUNNER_TEMP/imst_mamba_official_six_vitals_v1"
+          python -m scripts.benchmark_official_six_vitals \
+            --input "$RAW_DIR" \
+            --artifact-dir "$ARTIFACT_DIR" \
+            --seed 42 \
+            --epochs 4 \
+            --batch-size 96 \
+            --patience 2 | tee "$RUNNER_TEMP/train_imst.log"
+          echo "ARTIFACT_DIR=$ARTIFACT_DIR" >> "$GITHUB_ENV"
+
+      - name: Save benchmark provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$ARTIFACT_DIR/dataset_provenance.json" <<EOF
+          {
+            "source": "PhysioNet/Computing in Cardiology Challenge 2019 v1.0.0",
+            "official_url": "https://physionet.org/content/challenge-2019/1.0.0/",
+            "download_source": "s3://physionet-open/challenge-2019/1.0.0/training/",
+            "patient_files": ${PATIENT_COUNT},
+            "source_tree_sha256": "${SOURCE_SHA}",
+            "feature_contract": ["HR", "SBP", "DBP", "Resp", "Temp", "O2Sat"],
+            "target": "official SepsisLabel used directly; no additional shift",
+            "split": "patient-level stratified 70/15/15; seed 42",
+            "threshold_selection": "validation normalized Challenge utility only",
+            "clinical_use": false,
+            "training_run_sha": "${GITHUB_SHA}",
+            "runner": "GitHub-hosted CPU"
+          }
+          EOF
+          cp "$RUNNER_TEMP/train_imst.log" "$ARTIFACT_DIR/train.log"
+
+      - name: Publish metrics to job summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          m = json.loads((Path(os.environ['ARTIFACT_DIR']) / 'metrics.json').read_text())
+          v = m['validation']
+          t = m['test']
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as f:
+              f.write('# Official six-Vitals IMST-Mamba benchmark\n\n')
+              f.write(f"- Train/Val/Test patients: {m['split']['train_patients']} / {m['split']['validation_patients']} / {m['split']['test_patients']}\n")
+              f.write(f"- Epochs completed: {m['architecture']['epochs_completed']}\n")
+              f.write(f"- Validation utility: **{v['challenge_utility']:.4f}**\n")
+              f.write(f"- Test utility: **{t['challenge_utility']:.4f}**\n")
+              f.write(f"- Test AUROC: **{t['auroc']:.4f}**\n")
+              f.write(f"- Test AUPRC: **{t['auprc']:.4f}**\n")
+              f.write(f"- Test sensitivity: {t['sensitivity']:.4f}\n")
+              f.write(f"- Test specificity: {t['specificity']:.4f}\n")
+              f.write('\nCurrent Medi-Matrix GRU reference: utility 0.3451, AUROC 0.7946, AUPRC 0.0950.\n')
+          PY
+
+      - name: Upload benchmark artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: imst-mamba-official-six-vitals-${{ github.sha }}
+          path: ${{ env.ARTIFACT_DIR }}
+          if-no-files-found: error
+          retention-days: 14
