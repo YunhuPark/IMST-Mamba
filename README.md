@@ -1,6 +1,6 @@
 # IMST-Mamba: Informative Missingness State-Space Model for Early Sepsis Prediction
 
-> **MLHC 2026 Submission**
+> **Personal research project. Unpublished draft, not submitted to any venue.**
 
 IMST-Mamba encodes a three-state missingness taxonomy (*never observed*, *recently observed*, *stale*) within a selective state-space backbone for early sepsis prediction in ICU patients. On the PhysioNet Sepsis Challenge 2019 dataset, it achieves AUROC 0.8514 on long-stay patients, outperforming Transformer (+3.9 points) and GRU-D in the clinically critical subgroup where temporal missingness patterns are most complex.
 
@@ -116,7 +116,7 @@ Triage/
 │   └── model_grud.yaml
 ├── tests/
 ├── paper_imst_mamba_standalone.tex  # Paper (compiles without jmlr2e)
-├── paper_imst_mamba.tex             # Paper (MLHC/PMLR official template)
+├── paper_imst_mamba.tex             # Paper draft (JMLR/PMLR style)
 └── references.bib
 ```
 
@@ -170,8 +170,7 @@ python scripts/generate_figures.py              # Paper figures
             for Early Sepsis Prediction in ICU Patients},
   author = {Park, Yunhu},
   year   = {2026},
-  note   = {Manuscript under review at the Machine Learning for
-            Healthcare Conference (MLHC) 2026. Not yet peer reviewed;
+  note   = {Unpublished personal research draft. Not peer reviewed;
             please do not cite as published.}
 }
 ```
