@@ -1,5 +1,5 @@
 """
-Generate all paper figures from verified Kaggle experiment results.
+Generate all figures from verified Kaggle experiment results.
 No JSON files needed — all values hard-coded from confirmed output.
 
 Usage:

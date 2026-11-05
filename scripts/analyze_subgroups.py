@@ -1,5 +1,5 @@
 """
-Subgroup analysis for top-tier paper.
+Subgroup analysis.
 
 Analyses:
   1. Missingness tier (low / mid / high missing rate)

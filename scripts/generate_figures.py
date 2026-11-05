@@ -1,5 +1,5 @@
 """
-Generate publication-quality figures for the IMST-Mamba paper.
+Generate figures for IMST-Mamba.
 
 Reads JSON result files from results/ and produces:
   Figure 1 — Subgroup AUROC bar chart (long vs short stays)
@@ -122,7 +122,7 @@ def fig_subgroup_auroc():
 # ── Figure 2: Ablation ─────────────────────────────────────────────────────
 
 def fig_ablation():
-    # Hard-coded ablation results (from paper Table 3)
+    # Hard-coded ablation results (from the reported ablation results)
     variants = [
         ("Full model",                  0.7791),
         ("−  mask ($m{=}1$)",           0.7406),
@@ -226,7 +226,7 @@ def fig_uncertainty_miss():
 # ── Figure 5: Early Detection Comparison ──────────────────────────────────
 
 def fig_early_detection():
-    # Hard-coded from paper Table 5
+    # Hard-coded from the reported results
     methods = ["qSOFA≥2", "modSOFA≥2", "GRU-D", "LSTM",
                "Transformer", "IMST-Mamba"]
     det_rate = [49.0, None, 70.6, 66.3, 69.0, 68.5]

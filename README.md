@@ -1,6 +1,6 @@
 # IMST-Mamba: Informative Missingness State-Space Model for Early Sepsis Prediction
 
-> **Personal research project. Unpublished draft, not submitted to any venue.**
+> **Personal research project.**
 
 IMST-Mamba encodes a three-state missingness taxonomy (*never observed*, *recently observed*, *stale*) within a selective state-space backbone for early sepsis prediction in ICU patients. On the PhysioNet Sepsis Challenge 2019 dataset, it achieves AUROC 0.8514 on long-stay patients, outperforming Transformer (+3.9 points) and GRU-D in the clinically critical subgroup where temporal missingness patterns are most complex.
 
@@ -14,8 +14,7 @@ IMST-Mamba encodes a three-state missingness taxonomy (*never observed*, *recent
 | **IMST-Mamba** | 0.7791 | **0.8514** | 0.484 | 44.7h |
 
 Long stays are the only subgroup IMST-Mamba wins. Transformer is ahead
-in every other stratum reported below (Table 2 in
-[`paper_draft.md`](paper_draft.md), §5.2):
+in every other stratum reported below:
 
 | Subgroup | IMST-Mamba | Transformer | GRU-D | LSTM |
 |---------|:---:|:---:|:---:|:---:|
@@ -29,7 +28,7 @@ in every other stratum reported below (Table 2 in
 So the claim is a subgroup where missingness structure carries signal,
 not a better model overall.
 
-> **Short stays is withheld pending re-run.** Table 2 of the draft lists
+> **Short stays is withheld pending re-run.** An earlier results table listed
 > identical values for `Short stays` and `First 6h` — 0.6474 / 0.9392 /
 > 0.6306 / 0.7093 across all four models. The two are computed over
 > different patient sets in
@@ -108,16 +107,13 @@ Triage/
 │   ├── analyze_imputation_comparison.py # B4: Imputation strategies
 │   ├── analyze_ablation.py              # Ablation study
 │   ├── analyze_subgroups.py             # Subgroup analysis
-│   └── generate_figures.py             # Paper figures
+│   └── generate_figures.py             # Figures
 ├── configs/
 │   ├── base.yaml
 │   ├── model_imst_mamba.yaml
 │   ├── model_transformer.yaml
 │   └── model_grud.yaml
-├── tests/
-├── paper_imst_mamba_standalone.tex  # Paper (compiles without jmlr2e)
-├── paper_imst_mamba.tex             # Paper draft (JMLR/PMLR style)
-└── references.bib
+└── tests/
 ```
 
 ## Setup
@@ -159,20 +155,7 @@ python scripts/analyze_clinical_comparison.py   # qSOFA/SOFA comparison
 python scripts/analyze_mc_dropout.py            # Uncertainty (MC Dropout)
 python scripts/analyze_ewt.py                   # Early Warning Time
 python scripts/analyze_imputation_comparison.py # Imputation strategies
-python scripts/generate_figures.py              # Paper figures
-```
-
-## Citation
-
-```bibtex
-@misc{imstmamba2026,
-  title  = {IMST-Mamba: Informative Missingness State-Space Model
-            for Early Sepsis Prediction in ICU Patients},
-  author = {Park, Yunhu},
-  year   = {2026},
-  note   = {Unpublished personal research draft. Not peer reviewed;
-            please do not cite as published.}
-}
+python scripts/generate_figures.py              # Figures
 ```
 
 ## License
