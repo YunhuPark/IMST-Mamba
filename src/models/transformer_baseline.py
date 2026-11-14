@@ -77,7 +77,10 @@ class TransformerBaseline(nn.Module):
 
         # src_key_padding_mask: True for positions to IGNORE
         key_pad = ~attn_mask
-        h = self.encoder(h, src_key_padding_mask=key_pad)    # (B, T, d_model)
+        # Every timestep is evaluated as an online prediction. Padding masks
+        # alone still let an earlier query attend to future observations.
+        causal = torch.ones(x.size(1), x.size(1), dtype=torch.bool, device=x.device).triu(1)
+        h = self.encoder(h, mask=causal, src_key_padding_mask=key_pad)
 
         logit = self.head(h)
         logit = logit * attn_mask.unsqueeze(-1).float()

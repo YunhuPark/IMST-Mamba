@@ -59,32 +59,19 @@ class RETAIN(nn.Module):
         e = self.embed(x * m)              # (B, T, hidden)
         e = self.dropout(e)
 
-        # Reverse sequences for reverse-time attention
-        # Only reverse up to valid length
-        e_rev = torch.flip(e, dims=[1])
-
-        # Alpha attention (visit importance)
-        g, _ = self.gru_alpha(e_rev)       # (B, T, hidden)
-        g = torch.flip(g, dims=[1])
-        alpha = self.attn_alpha(g)         # (B, T, 1)
-        alpha = alpha.masked_fill(~attn_mask.unsqueeze(-1), float("-inf"))
-        alpha = torch.softmax(alpha, dim=1)  # (B, T, 1)
-
-        # Beta attention (variable importance)
-        h_rev, _ = self.gru_beta(e_rev)   # (B, T, hidden)
-        h_rev = torch.flip(h_rev, dims=[1])
-        beta = torch.tanh(self.attn_beta(h_rev))  # (B, T, F)
-
-        # Context vector per step (cumulative)
-        # For step-wise prediction, compute context up to each step
+        # Reverse attention must be recomputed for each observed prefix.
+        # Reversing the complete stay first leaks future visits into alpha/beta.
         logits = []
         for t in range(T):
-            # Context: attention-weighted sum of past steps
-            # alpha: (B, T, 1), x: (B, T, F), beta: (B, T, F)
-            alpha_t = alpha[:, :t+1]       # (B, t+1, 1)
-            beta_t = beta[:, :t+1]         # (B, t+1, F)
-            x_t = x[:, :t+1]              # (B, t+1, F)
-            ctx = (alpha_t * beta_t * x_t).sum(dim=1)   # (B, F)
+            e_rev = e[:, :t+1].flip(1)
+            g, _ = self.gru_alpha(e_rev)
+            h, _ = self.gru_beta(e_rev)
+            valid = attn_mask[:, :t+1].unsqueeze(-1)
+            scores = self.attn_alpha(g.flip(1)).masked_fill(~valid, -1e9)
+            alpha_t = torch.softmax(scores, dim=1) * valid
+            alpha_t = alpha_t / alpha_t.sum(dim=1, keepdim=True).clamp_min(1e-12)
+            beta_t = torch.tanh(self.attn_beta(h.flip(1)))
+            ctx = (alpha_t * beta_t * x[:, :t+1]).sum(dim=1)
             logits.append(self.head(ctx))   # (B, 1)
 
         logit_sepsis = torch.stack(logits, dim=1)   # (B, T, 1)
