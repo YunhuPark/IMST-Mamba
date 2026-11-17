@@ -2,9 +2,18 @@
 
 > **Personal research project.**
 
-IMST-Mamba encodes a three-state missingness taxonomy (*never observed*, *recently observed*, *stale*) within a selective state-space backbone for early sepsis prediction in ICU patients. On the PhysioNet Sepsis Challenge 2019 dataset, it achieves AUROC 0.8514 on long-stay patients, outperforming Transformer (+3.9 points) and GRU-D in the clinically critical subgroup where temporal missingness patterns are most complex.
+IMST-Mamba investigates a three-state missingness taxonomy (*never observed*, *recently observed*, *stale*) within a selective state-space backbone for early sepsis prediction in ICU research.
 
-## Key Results
+> **Baseline comparisons withdrawn pending causal re-evaluation (2026-11-17).**
+> The earlier Transformer and RETAIN implementations could use future observations.
+> Their code now enforces observed-prefix inference, but existing checkpoints,
+> result files and figures were produced before that correction. The historical
+> numbers below must not be used to rank models, claim subgroup superiority or
+> support clinical deployment. Retrain and re-evaluate the corrected baselines on
+> the same patient split before making any renewed comparison.
+
+
+## Historical outputs — comparisons not currently valid
 
 | Model | Overall AUROC | Long-stay AUROC | Se@Sp90 | Mean EWT |
 |-------|:---:|:---:|:---:|:---:|
@@ -13,8 +22,8 @@ IMST-Mamba encodes a three-state missingness taxonomy (*never observed*, *recent
 | Transformer | **0.8517** | 0.8122 | **0.552** | 56.7h |
 | **IMST-Mamba** | 0.7791 | **0.8514** | 0.484 | 44.7h |
 
-Long stays are the only subgroup IMST-Mamba wins. Transformer is ahead
-in every other stratum reported below:
+The following subgroup outputs are retained for provenance only; the old baseline
+rankings are invalid until a causal re-run is recorded:
 
 | Subgroup | IMST-Mamba | Transformer | GRU-D | LSTM |
 |---------|:---:|:---:|:---:|:---:|
@@ -25,8 +34,7 @@ in every other stratum reported below:
 | Short stays | _under verification_ | _under verification_ | _under verification_ | _under verification_ |
 | Long stays | **0.8514** | 0.8122 | 0.8468 | 0.8419 |
 
-So the claim is a subgroup where missingness structure carries signal,
-not a better model overall.
+No comparative performance claim is made from these historical tables.
 
 > **Short stays is withheld pending re-run.** An earlier results table listed
 > identical values for `Short stays` and `First 6h` — 0.6474 / 0.9392 /
